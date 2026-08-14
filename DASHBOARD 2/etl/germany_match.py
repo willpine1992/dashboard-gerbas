@@ -116,6 +116,7 @@ def compute_matches_for_researcher(
     from_year: int, top_n: int = 8,
 ) -> list[dict]:
     aggregated: dict[str, dict] = {}
+    first_keyword: dict[str, str] = {}
     for kw in keywords:
         for cand in matcher.candidates_for_keyword(kw, from_year):
             if not cand.get("openalex_id") or not cand.get("nome"):
@@ -133,6 +134,25 @@ def compute_matches_for_researcher(
                 "sample_doi": cand["sample_doi"],
             })
             entry["keywords"].add(kw)
+            first_keyword.setdefault(cand["openalex_id"], kw)
 
-    ranked = sorted(aggregated.values(), key=lambda e: len(e["keywords"]), reverse=True)
-    return ranked[:top_n]
+    # Candidatos com >1 linha de pesquisa em comum são o sinal mais forte —
+    # sempre entram primeiro. Entre os que só batem em 1 linha, evita que a
+    # keyword mais frequente/genérica (processada primeiro) monopolize as
+    # vagas: distribui em round-robin entre as keywords buscadas, para que
+    # cada linha específica do pesquisador tenha chance de aparecer.
+    multi = [e for e in aggregated.values() if len(e["keywords"]) > 1]
+    multi.sort(key=lambda e: len(e["keywords"]), reverse=True)
+
+    single_by_kw: dict[str, list[dict]] = {kw: [] for kw in keywords}
+    for e in aggregated.values():
+        if len(e["keywords"]) == 1:
+            single_by_kw[first_keyword[e["openalex_id"]]].append(e)
+
+    round_robin: list[dict] = []
+    while any(single_by_kw.values()):
+        for kw in keywords:
+            if single_by_kw[kw]:
+                round_robin.append(single_by_kw[kw].pop(0))
+
+    return (multi + round_robin)[:top_n]
