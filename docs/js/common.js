@@ -18,11 +18,12 @@ const MAX_CATEGORICAL_INDIVIDUAL = 7; // top-N linhas de pesquisa ganham cor prÃ
 const GREEN_SEQUENTIAL = ["#eaf7f0", "#c7ecda", "#96dab9", "#5fc192", "#2e9e6c", "#0f7a4d", "#0b5c3a"];
 
 async function loadData() {
+  const opts = { cache: "no-cache" }; // sempre revalida com o servidor â€” dados mudam a cada reexport do ETL
   const [researchers, edges, institutions, manaus] = await Promise.all([
-    fetch("data/researchers.json").then((r) => r.json()),
-    fetch("data/edges.json").then((r) => r.json()),
-    fetch("data/institutions.json").then((r) => r.json()),
-    fetch("data/manaus.json").then((r) => r.json()),
+    fetch("data/researchers.json", opts).then((r) => r.json()),
+    fetch("data/edges.json", opts).then((r) => r.json()),
+    fetch("data/institutions.json", opts).then((r) => r.json()),
+    fetch("data/manaus.json", opts).then((r) => r.json()),
   ]);
   const institutionByName = new Map(institutions.map((i) => [i.instituicao, i]));
   const researcherById = new Map(researchers.map((r) => [r.id, r]));
