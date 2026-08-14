@@ -11,9 +11,13 @@
   `);
 
   const maxMatches = d3.max(institutions, (d) => d.n_matches) || 1;
-  const widthScale = d3.scaleSqrt().domain([1, maxMatches]).range([1.4, 6]);
-  const colorScale = d3.scaleQuantize().domain([1, maxMatches]).range(GREEN_SEQUENTIAL.slice(1));
-  const dotScale = d3.scaleSqrt().domain([1, maxMatches]).range([3, 11]);
+  let widthScale, colorScale, dotScale;
+  function computeScales() {
+    widthScale = d3.scaleSqrt().domain([1, maxMatches]).range([1.4, 6]);
+    colorScale = d3.scaleQuantize().domain([1, maxMatches]).range(GREEN_SEQUENTIAL.slice(1));
+    dotScale = d3.scaleSqrt().domain([1, maxMatches]).range([3, 11]);
+  }
+  computeScales();
 
   renderLegend();
   let activeInstitution = null;
@@ -22,8 +26,14 @@
   let projection, path, baseScale, minScale, maxScale;
   let svg, arcs, dots, originG, originLabel, highlight;
 
+  initThemeToggle();
   build();
   window.addEventListener("resize", debounce(build, 200));
+  window.addEventListener("gerbras:themechange", () => {
+    computeScales();
+    renderLegend();
+    build();
+  });
 
   function build() {
     const width = el.clientWidth, height = el.clientHeight;
@@ -53,8 +63,8 @@
       .data(world.features)
       .join("path")
       .attr("class", "map-country")
-      .attr("fill", "#eef5f1")
-      .attr("stroke", "#ffffff")
+      .attr("fill", CHART_MAP_FILL)
+      .attr("stroke", CHART_MAP_BORDER)
       .attr("stroke-width", 0.6);
 
     const arcG = svg.append("g");
@@ -74,16 +84,16 @@
       .attr("class", "flow-dot-dest")
       .attr("r", (d) => dotScale(d.n_matches))
       .attr("fill", (d) => colorScale(d.n_matches))
-      .attr("stroke", "#ffffff")
+      .attr("stroke", CHART_MAP_BORDER)
       .attr("stroke-width", 1.4);
 
     originG = svg.append("g");
     originG.append("circle").attr("class", "flow-dot-origin").attr("r", 6);
     originG.append("circle").attr("r", 6).attr("fill", "none")
-      .attr("stroke", "#0b3d2b").attr("stroke-width", 1.4).attr("opacity", 0.5)
+      .attr("stroke", CHART_NODE_NEUTRAL).attr("stroke-width", 1.4).attr("opacity", 0.5)
       .append("animate").attr("attributeName", "r").attr("values", "6;20;6").attr("dur", "3s").attr("repeatCount", "indefinite");
     originG.append("circle").attr("r", 6).attr("fill", "none")
-      .attr("stroke", "#0b3d2b").attr("stroke-width", 1.4)
+      .attr("stroke", CHART_NODE_NEUTRAL).attr("stroke-width", 1.4)
       .append("animate").attr("attributeName", "opacity").attr("values", "0.5;0;0.5").attr("dur", "3s").attr("repeatCount", "indefinite");
     originLabel = svg.append("text").attr("text-anchor", "middle").attr("class", "bar-label")
       .style("font-weight", 800).text("Manaus");

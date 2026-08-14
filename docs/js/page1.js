@@ -73,6 +73,8 @@
   });
 
   window.addEventListener("resize", debounce(render, 200));
+  window.addEventListener("gerbras:themechange", render);
+  initThemeToggle();
 
   function syncURL() {
     const qs = filtersToURL(filters);

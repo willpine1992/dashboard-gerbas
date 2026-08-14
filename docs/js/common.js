@@ -2,7 +2,11 @@
    GERBRAS Dashboard — utilidades compartilhadas: dados, paleta, filtros
    ========================================================================== */
 
-const CAT_COLORS = [
+// Valores iniciais (tema claro); refreshThemeColors() os substitui lendo as
+// CSS custom properties, então ficam corretos tanto no 1º load quanto após
+// alternar o tema. Ficam como `let` de propósito — outros arquivos leem o
+// mesmo binding global e enxergam a reatribuição automaticamente.
+let CAT_COLORS = [
   "#2a78d6", // 1 azul
   "#eb6834", // 2 laranja
   "#1baf7a", // 3 água
@@ -12,10 +16,55 @@ const CAT_COLORS = [
   "#4a3aa7", // 7 violeta
   "#e34948", // 8 vermelho — reservado p/ bucket "Outras"
 ];
-const OTHER_COLOR = CAT_COLORS[7];
+let OTHER_COLOR = CAT_COLORS[7];
 const MAX_CATEGORICAL_INDIVIDUAL = 7; // top-N linhas de pesquisa ganham cor própria; resto -> "Outras"
 
-const GREEN_SEQUENTIAL = ["#eaf7f0", "#c7ecda", "#96dab9", "#5fc192", "#2e9e6c", "#0f7a4d", "#0b5c3a"];
+let GREEN_SEQUENTIAL = ["#eaf7f0", "#c7ecda", "#96dab9", "#5fc192", "#2e9e6c", "#0f7a4d", "#0b5c3a"];
+let CHART_MAP_FILL = "#eef5f1";
+let CHART_MAP_BORDER = "#ffffff";
+let CHART_NODE_NEUTRAL = "#0b3d2b";
+
+/* ---------- tema claro/escuro ---------- */
+const THEME_KEY = "gerbras-theme";
+
+function readCssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function refreshThemeColors() {
+  CAT_COLORS = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => readCssVar(`--cat-${i}`));
+  OTHER_COLOR = CAT_COLORS[7];
+  GREEN_SEQUENTIAL = [1, 2, 3, 4, 5, 6, 7].map((i) => readCssVar(`--chart-seq-${i}`));
+  CHART_MAP_FILL = readCssVar("--chart-map-fill");
+  CHART_MAP_BORDER = readCssVar("--chart-map-border");
+  CHART_NODE_NEUTRAL = readCssVar("--chart-node-neutral");
+}
+
+function getTheme() {
+  return document.documentElement.getAttribute("data-theme") ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
+  refreshThemeColors();
+  const btn = document.getElementById("theme-toggle");
+  if (btn) btn.setAttribute("aria-label", theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro");
+  window.dispatchEvent(new CustomEvent("gerbras:themechange", { detail: { theme } }));
+}
+
+function toggleTheme() { applyTheme(getTheme() === "dark" ? "light" : "dark"); }
+
+function initThemeToggle() {
+  refreshThemeColors();
+  const theme = getTheme();
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.setAttribute("aria-label", theme === "dark" ? "Mudar para tema claro" : "Mudar para tema escuro");
+    btn.addEventListener("click", toggleTheme);
+  }
+}
 
 async function loadData() {
   const opts = { cache: "no-cache" }; // sempre revalida com o servidor — dados mudam a cada reexport do ETL

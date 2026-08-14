@@ -3,6 +3,7 @@
    ========================================================================== */
 (async function () {
   const { edges, institutions, researcherById } = await loadData();
+  initThemeToggle();
 
   const params = new URLSearchParams(location.search);
   const oaId = params.get("oa");
@@ -47,6 +48,11 @@
   renderInstitution();
   renderPublications();
   wireBackButton();
+
+  window.addEventListener("gerbras:themechange", () => {
+    renderPersonal();
+    if (inst && inst.lat != null) renderInstitutionMap(document.getElementById("institution-map"), inst.lat, inst.lon, instName);
+  });
 
   /* ---------------- coluna 1: pessoal ---------------- */
   function renderPersonal() {

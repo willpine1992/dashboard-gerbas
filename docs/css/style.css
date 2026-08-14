@@ -57,6 +57,87 @@
     "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
   --topbar-h: 10vh;
+
+  /* mapas/gráficos — cromo neutro (lido pelo JS via getComputedStyle) */
+  --chart-map-fill: #eef5f1;
+  --chart-map-border: #ffffff;
+  --chart-node-neutral: #0b3d2b;
+  --chart-seq-1: #eaf7f0; --chart-seq-2: #c7ecda; --chart-seq-3: #96dab9;
+  --chart-seq-4: #5fc192; --chart-seq-5: #2e9e6c; --chart-seq-6: #0f7a4d; --chart-seq-7: #0b5c3a;
+
+  --topbar-bg: rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- tema escuro: alta legibilidade, mesmos tokens ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-page: #0a100c;
+    --surface-panel: #101712;
+    --surface-alt: #171f1a;
+    --surface-hover: #1e2921;
+
+    --ink-primary: #7fe8ab;
+    --ink-secondary: #e7ebe8;
+    --ink-muted: #93a196;
+    --ink-on-accent: #06120a;
+
+    --border-hairline: #24352b;
+    --border-strong: #3a5a45;
+
+    --accent: #34d399;
+    --accent-strong: #6ee7b8;
+    --accent-wash: rgba(52, 211, 153, 0.16);
+
+    --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; --cat-4: #c98500;
+    --cat-5: #d55181; --cat-6: #14a814; --cat-7: #9085e9; --cat-8: #e66767;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+    --shadow-lift: 0 12px 36px rgba(0, 0, 0, 0.65);
+
+    --chart-map-fill: #1c2620;
+    --chart-map-border: #0a100c;
+    --chart-node-neutral: #e7ebe8;
+    --chart-seq-1: #142a20; --chart-seq-2: #164028; --chart-seq-3: #185c34;
+    --chart-seq-4: #1c7d40; --chart-seq-5: #26a352; --chart-seq-6: #4bc873; --chart-seq-7: #8de6a5;
+
+    --topbar-bg: rgba(10, 16, 12, 0.86);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-page: #0a100c;
+  --surface-panel: #101712;
+  --surface-alt: #171f1a;
+  --surface-hover: #1e2921;
+
+  --ink-primary: #7fe8ab;
+  --ink-secondary: #e7ebe8;
+  --ink-muted: #93a196;
+  --ink-on-accent: #06120a;
+
+  --border-hairline: #24352b;
+  --border-strong: #3a5a45;
+
+  --accent: #34d399;
+  --accent-strong: #6ee7b8;
+  --accent-wash: rgba(52, 211, 153, 0.16);
+
+  --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; --cat-4: #c98500;
+  --cat-5: #d55181; --cat-6: #14a814; --cat-7: #9085e9; --cat-8: #e66767;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lift: 0 12px 36px rgba(0, 0, 0, 0.65);
+
+  --chart-map-fill: #1c2620;
+  --chart-map-border: #0a100c;
+  --chart-node-neutral: #e7ebe8;
+  --chart-seq-1: #142a20; --chart-seq-2: #164028; --chart-seq-3: #185c34;
+  --chart-seq-4: #1c7d40; --chart-seq-5: #26a352; --chart-seq-6: #4bc873; --chart-seq-7: #8de6a5;
+
+  --topbar-bg: rgba(10, 16, 12, 0.86);
 }
 
 * { box-sizing: border-box; }
@@ -90,7 +171,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--topbar-bg);
   backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border-hairline);
   position: relative;
@@ -110,12 +191,28 @@ html, body {
   border: 1px solid transparent; transition: all var(--dur-fast) var(--ease);
 }
 .topbar__link:hover { background: var(--surface-hover); border-color: var(--border-hairline); }
-.topbar__link.is-active { background: var(--ink-primary); color: #fff; }
+.topbar__link.is-active { background: var(--ink-primary); color: var(--ink-on-accent); }
 
 .topbar__stats { display: flex; gap: 22px; margin-right: 6px; }
 .topbar__stat { text-align: right; line-height: 1.1; }
 .topbar__stat b { display: block; font-size: 15px; color: var(--ink-primary); font-variant-numeric: tabular-nums; }
 .topbar__stat small { font-size: 10.5px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.theme-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex: none; margin-right: 2px;
+  border-radius: 50%; border: 1px solid var(--border-hairline);
+  background: var(--surface-alt); color: var(--ink-primary);
+  cursor: pointer; transition: all var(--dur-fast) var(--ease);
+}
+.theme-toggle:hover { background: var(--surface-hover); border-color: var(--border-strong); transform: translateY(-1px); }
+.theme-toggle svg { width: 16px; height: 16px; }
+/* o JS sempre define data-theme explicitamente em <html>, então só
+   precisamos alternar os ícones por esse atributo */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 /* ==========================================================================
    Layout de colunas — página 1

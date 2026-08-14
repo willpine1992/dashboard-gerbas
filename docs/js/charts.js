@@ -86,7 +86,7 @@ function renderSankey(el, edgeSubset, colorInfo, opts = {}) {
     .attr("width", (d) => d.x1 - d.x0)
     .attr("height", (d) => Math.max(2, d.y1 - d.y0))
     .attr("rx", 3)
-    .attr("fill", (d) => (d.side === "left" ? colorFor(d.name) : "#0b3d2b"));
+    .attr("fill", (d) => (d.side === "left" ? colorFor(d.name) : CHART_NODE_NEUTRAL));
 
   nodeSel.append("text")
     .attr("x", (d) => (d.side === "left" ? d.x0 - 8 : d.x1 + 8))
@@ -198,15 +198,15 @@ async function renderInstitutionMap(el, lat, lon, label) {
     .data(world.features)
     .join("path")
     .attr("class", "map-country")
-    .attr("fill", "#eef5f1")
-    .attr("stroke", "#ffffff")
+    .attr("fill", CHART_MAP_FILL)
+    .attr("stroke", CHART_MAP_BORDER)
     .attr("stroke-width", 0.6)
     .attr("d", path);
 
   const xy = projection([lon, lat]);
   const g = svg.append("g").attr("transform", `translate(${xy[0]},${xy[1]})`);
-  g.append("circle").attr("r", 7).attr("fill", "#0b3d2b").attr("stroke", "#fff").attr("stroke-width", 2);
-  g.append("circle").attr("r", 7).attr("fill", "none").attr("stroke", "#0b3d2b").attr("stroke-width", 1.4).attr("opacity", 0.5)
+  g.append("circle").attr("r", 7).attr("fill", CHART_NODE_NEUTRAL).attr("stroke", CHART_MAP_BORDER).attr("stroke-width", 2);
+  g.append("circle").attr("r", 7).attr("fill", "none").attr("stroke", CHART_NODE_NEUTRAL).attr("stroke-width", 1.4).attr("opacity", 0.5)
     .append("animate").attr("attributeName", "r").attr("values", "7;20;7").attr("dur", "2.4s").attr("repeatCount", "indefinite");
 
   if (label) {
@@ -251,9 +251,9 @@ async function renderCountryMap(el, edgeSubset) {
     .attr("d", path)
     .attr("fill", (d) => {
       const v = countryNameToCount.get(normalizeCountry(d.properties.name));
-      return v ? colorScale(v) : "#eef2f0";
+      return v ? colorScale(v) : CHART_MAP_FILL;
     })
-    .attr("stroke", "#ffffff")
+    .attr("stroke", CHART_MAP_BORDER)
     .attr("stroke-width", 0.5)
     .on("mousemove", (ev, d) => {
       const v = countryNameToCount.get(normalizeCountry(d.properties.name));
