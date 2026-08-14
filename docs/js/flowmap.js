@@ -19,10 +19,13 @@
   let activeInstitution = null;
 
   const el = document.getElementById("flow-chart");
-  draw();
-  window.addEventListener("resize", debounce(draw, 200));
+  let projection, path, baseScale, minScale, maxScale;
+  let svg, arcs, dots, originG, originLabel, highlight;
 
-  function draw() {
+  build();
+  window.addEventListener("resize", debounce(build, 200));
+
+  function build() {
     const width = el.clientWidth, height = el.clientHeight;
     d3.select(el).selectAll("*").remove();
     if (width < 10 || height < 10) return;
@@ -30,66 +33,51 @@
     const midLon = (manaus.lon + d3.mean(institutions, (d) => d.lon)) / 2;
     const midLat = (manaus.lat + d3.mean(institutions, (d) => d.lat)) / 2;
 
-    const projection = d3.geoOrthographic().rotate([-midLon, -midLat]).clipAngle(90);
+    projection = d3.geoOrthographic().rotate([-midLon, -midLat]).clipAngle(90);
     const points = {
       type: "MultiPoint",
       coordinates: [[manaus.lon, manaus.lat], ...institutions.map((d) => [d.lon, d.lat])],
     };
     projection.fitExtent([[36, 30], [width - 36, height - 30]], points);
-    const path = d3.geoPath(projection);
+    path = d3.geoPath(projection);
+    baseScale = projection.scale();
+    minScale = baseScale * 0.55;
+    maxScale = baseScale * 5;
 
-    const svg = d3.select(el).append("svg").attr("width", width).attr("height", height)
-      .on("click", () => setActive(null));
+    svg = d3.select(el).append("svg").attr("width", width).attr("height", height)
+      .attr("class", "flow-globe").on("click", () => { if (!justDragged) setActive(null); });
 
-    svg.append("path").attr("class", "map-sphere").attr("d", path({ type: "Sphere" }));
-    svg.append("path").attr("class", "map-graticule").attr("d", path(d3.geoGraticule10()));
-    svg.append("g").selectAll("path.country")
+    svg.append("path").attr("class", "map-sphere");
+    svg.append("path").attr("class", "map-graticule");
+    svg.append("g").attr("class", "countries-g").selectAll("path.country")
       .data(world.features)
       .join("path")
       .attr("class", "map-country")
       .attr("fill", "#eef5f1")
       .attr("stroke", "#ffffff")
-      .attr("stroke-width", 0.6)
-      .attr("d", path);
-
-    const visibleOrthographic = (lon, lat) => {
-      const c = d3.geoDistance([lon, lat], [-projection.rotate()[0], -projection.rotate()[1]]);
-      return c < Math.PI / 2;
-    };
-
-    const arcsData = institutions.map((inst) => ({
-      inst,
-      d: path({
-        type: "LineString",
-        coordinates: interpolatedLine([manaus.lon, manaus.lat], [inst.lon, inst.lat]),
-      }),
-    })).filter((a) => a.d);
+      .attr("stroke-width", 0.6);
 
     const arcG = svg.append("g");
-    const arcs = arcG.selectAll("path.flow-arc")
-      .data(arcsData)
+    arcs = arcG.selectAll("path.flow-arc")
+      .data(institutions)
       .join("path")
       .attr("class", "flow-arc")
-      .attr("d", (d) => d.d)
-      .attr("stroke", (d) => colorScale(d.inst.n_matches))
-      .attr("stroke-width", (d) => widthScale(d.inst.n_matches))
+      .attr("stroke", (d) => colorScale(d.n_matches))
+      .attr("stroke-width", (d) => widthScale(d.n_matches))
       .attr("stroke-opacity", 0.75)
       .attr("stroke-linecap", "round");
 
     const dotsG = svg.append("g");
-    const dots = dotsG.selectAll("circle.flow-dot-dest")
-      .data(institutions.filter((d) => visibleOrthographic(d.lon, d.lat)))
+    dots = dotsG.selectAll("circle.flow-dot-dest")
+      .data(institutions)
       .join("circle")
       .attr("class", "flow-dot-dest")
-      .attr("cx", (d) => projection([d.lon, d.lat])[0])
-      .attr("cy", (d) => projection([d.lon, d.lat])[1])
       .attr("r", (d) => dotScale(d.n_matches))
       .attr("fill", (d) => colorScale(d.n_matches))
       .attr("stroke", "#ffffff")
       .attr("stroke-width", 1.4);
 
-    const originXY = projection([manaus.lon, manaus.lat]);
-    const originG = svg.append("g").attr("transform", `translate(${originXY[0]},${originXY[1]})`);
+    originG = svg.append("g");
     originG.append("circle").attr("class", "flow-dot-origin").attr("r", 6);
     originG.append("circle").attr("r", 6).attr("fill", "none")
       .attr("stroke", "#0b3d2b").attr("stroke-width", 1.4).attr("opacity", 0.5)
@@ -97,23 +85,22 @@
     originG.append("circle").attr("r", 6).attr("fill", "none")
       .attr("stroke", "#0b3d2b").attr("stroke-width", 1.4)
       .append("animate").attr("attributeName", "opacity").attr("values", "0.5;0;0.5").attr("dur", "3s").attr("repeatCount", "indefinite");
-    svg.append("text").attr("x", originXY[0]).attr("y", originXY[1] - 14)
-      .attr("text-anchor", "middle").attr("class", "bar-label").style("font-weight", 800)
-      .text("Manaus");
+    originLabel = svg.append("text").attr("text-anchor", "middle").attr("class", "bar-label")
+      .style("font-weight", 800).text("Manaus");
 
-    function highlight(inst) {
-      arcs.classed("is-dim", (d) => inst && d.inst.instituicao !== inst.instituicao);
+    highlight = function (inst) {
+      arcs.classed("is-dim", (d) => inst && d.instituicao !== inst.instituicao);
       dots.attr("opacity", (d) => (!inst || d.instituicao === inst.instituicao ? 1 : 0.25));
-    }
+    };
 
     arcs
       .on("mousemove", (ev, d) => {
-        if (!activeInstitution) highlight(d.inst);
-        showTooltip(ev.clientX, ev.clientY, `<b>${d.inst.instituicao}</b><br>${fmt(d.inst.n_matches)} conexões · ${fmt(d.inst.n_researchers)} professor(es)`);
+        if (!activeInstitution) highlight(d);
+        showTooltip(ev.clientX, ev.clientY, `<b>${d.instituicao}</b><br>${fmt(d.n_matches)} conexões · ${fmt(d.n_researchers)} professor(es)`);
         ev.stopPropagation();
       })
       .on("mouseleave", () => { if (!activeInstitution) highlight(null); hideTooltip(); })
-      .on("click", (ev, d) => { ev.stopPropagation(); setActive(d.inst); });
+      .on("click", (ev, d) => { ev.stopPropagation(); setActive(d); });
 
     dots
       .on("mousemove", (ev, d) => {
@@ -124,7 +111,65 @@
       .on("mouseleave", () => { if (!activeInstitution) highlight(null); hideTooltip(); })
       .on("click", (ev, d) => { ev.stopPropagation(); setActive(d); });
 
+    attachInteraction();
+    redraw();
     if (activeInstitution) highlight(activeInstitution);
+  }
+
+  /* ---------- arrastar p/ girar, scroll p/ zoom ---------- */
+  let justDragged = false;
+  function attachInteraction() {
+    const ROTATE_SENSITIVITY = 60;
+
+    const drag = d3.drag()
+      .on("start", () => { justDragged = false; svg.classed("is-grabbing", true); })
+      .on("drag", (ev) => {
+        if (Math.abs(ev.dx) + Math.abs(ev.dy) > 1) justDragged = true;
+        const k = ROTATE_SENSITIVITY / projection.scale();
+        const r = projection.rotate();
+        const nextLat = Math.max(-89, Math.min(89, r[1] - ev.dy * k));
+        projection.rotate([r[0] + ev.dx * k, nextLat]);
+        redraw();
+      })
+      .on("end", () => {
+        svg.classed("is-grabbing", false);
+        if (justDragged) hideTooltip();
+      });
+
+    svg.call(drag);
+
+    svg.on("wheel", (ev) => {
+      ev.preventDefault();
+      const factor = ev.deltaY < 0 ? 1.12 : 1 / 1.12;
+      const next = Math.max(minScale, Math.min(maxScale, projection.scale() * factor));
+      projection.scale(next);
+      redraw();
+    }, { passive: false });
+  }
+
+  function redraw() {
+    const rotate = projection.rotate();
+    const visibleOrthographic = (lon, lat) =>
+      d3.geoDistance([lon, lat], [-rotate[0], -rotate[1]]) < Math.PI / 2 - 0.02;
+
+    svg.select("path.map-sphere").attr("d", path({ type: "Sphere" }));
+    svg.select("path.map-graticule").attr("d", path(d3.geoGraticule10()));
+    svg.selectAll("path.map-country").attr("d", path);
+
+    arcs.attr("d", (d) => path({
+      type: "LineString",
+      coordinates: interpolatedLine([manaus.lon, manaus.lat], [d.lon, d.lat]),
+    }));
+
+    dots
+      .style("display", (d) => (visibleOrthographic(d.lon, d.lat) ? null : "none"))
+      .attr("cx", (d) => projection([d.lon, d.lat])[0])
+      .attr("cy", (d) => projection([d.lon, d.lat])[1]);
+
+    const originXY = projection([manaus.lon, manaus.lat]);
+    originG.attr("transform", `translate(${originXY[0]},${originXY[1]})`);
+    originLabel.attr("x", originXY[0]).attr("y", originXY[1] - 14)
+      .style("display", visibleOrthographic(manaus.lon, manaus.lat) ? null : "none");
   }
 
   function interpolatedLine(a, b) {
@@ -136,7 +181,7 @@
 
   function setActive(inst) {
     activeInstitution = inst;
-    draw();
+    highlight(inst);
     if (!inst) { d3.select("#flow-detail").classed("is-visible", false); return; }
     showDetail(inst);
   }
