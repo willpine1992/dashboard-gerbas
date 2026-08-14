@@ -32,7 +32,14 @@ GENERIC_KEYWORDS_STOPLIST = {
     "genetics", "biochemistry", "political science", "economics",
     "environmental chemistry", "agronomy", "botany", "pathology",
     "immunology", "microbiology", "philosophy", "history", "art",
-    "humanities", "work (physics)", "action (physics)",
+    "humanities", "work (physics)", "action (physics)", "context (archaeology)",
+    "control (management)", "government (linguistics)", "power (physics)",
+    "data collection", "field (mathematics)", "order (exchange)",
+    "theology", "meaning (existential)", "state (computer science)",
+    "schema (genetic algorithms)", "relation (database)", "process (computing)",
+    "principal (computer security)", "perspective (graphical)", "identity (music)",
+    "scope (computer science)", "subject (documents)", "set (abstract data type)",
+    "logo (programming language)", "causality (physics)",
 }
 
 
