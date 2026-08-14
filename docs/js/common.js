@@ -127,5 +127,9 @@ function fmt(n) { return n.toLocaleString("pt-BR"); }
 
 function debounce(fn, ms) {
   let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  return function (...args) {
+    const ctx = this; // preserva o `this` de quem chamou (ex: elemento do input em handlers do D3)
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(ctx, args), ms);
+  };
 }

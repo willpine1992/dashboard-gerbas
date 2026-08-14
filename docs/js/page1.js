@@ -59,8 +59,8 @@
     filters.area = this.value;
     syncURL(); render();
   });
-  d3.select("#prof-search").property("value", profSearchText).on("input", debounce(function () {
-    profSearchText = this.value;
+  d3.select("#prof-search").property("value", profSearchText).on("input", debounce(function (ev) {
+    profSearchText = ev.target.value;
     renderProfessorList();
   }, 120));
   d3.select("#btn-clear-filters").on("click", () => {
