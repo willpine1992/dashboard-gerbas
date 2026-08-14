@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GERBRAS · Mapa de Fluxo</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <img src="image/propespuea.svg" alt="PROPESP UEA" class="topbar__logo" />
+    <div class="topbar__title">
+      <strong>GERBRAS · Parcerias Internacionais</strong>
+      <span>Mapa de Fluxo — Manaus → Alemanha</span>
+    </div>
+  </div>
+
+  <div class="topbar__stats" id="topbar-stats"></div>
+
+  <nav class="topbar__nav">
+    <a href="index.html" class="topbar__link">Painel</a>
+    <a href="flowmap.html" class="topbar__link is-active">Mapa de Fluxo</a>
+  </nav>
+</header>
+
+<main class="flow-page">
+  <div class="flow-hero">
+    <div>
+      <h1>Fluxo de parcerias potenciais</h1>
+      <p>Cada linha liga Manaus a uma instituição estrangeira com pesquisa em comum com professores da UEA. Espessura e cor indicam o volume de conexões. Clique numa linha para ver os detalhes e voltar ao painel já filtrado.</p>
+    </div>
+    <div class="flow-legend" id="flow-legend"></div>
+  </div>
+
+  <div class="panel panel--flush flow-map-wrap">
+    <div id="flow-chart"></div>
+  </div>
+</main>
+
+<div class="flow-detail" id="flow-detail">
+  <h3 id="fd-title">—</h3>
+  <div class="muted" id="fd-sub">—</div>
+  <div class="kw-tags" id="fd-keywords"></div>
+  <div class="text-xs muted" style="margin-bottom:8px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;">Professores UEA envolvidos</div>
+  <div class="picklist" id="fd-professors" style="max-height:150px; margin-bottom:14px;"></div>
+  <div class="actions">
+    <button class="btn btn--ghost" id="fd-close">Fechar</button>
+  </div>
+</div>
+
+<script src="lib/d3.v7.min.js"></script>
+<script src="lib/topojson-client.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/flowmap.js"></script>
+</body>
+</html>

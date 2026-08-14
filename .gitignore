@@ -1,0 +1,41 @@
+# --- Ambientes virtuais / dependências (nunca versionar nem deixar o OneDrive "brigar" com eles) ---
+venv/
+.venv/
+env/
+node_modules/
+
+# --- Cache e artefatos Python ---
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Bancos de dados locais gerados pelo app ---
+*.db
+*.sqlite3
+*.duckdb
+
+# --- Variáveis de ambiente / segredos ---
+.env
+.env.*
+
+# --- Artefatos de build (caso o dashboard seja web/JS) ---
+dist/
+build/
+.next/
+.cache/
+
+# --- Editor / SO ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- Dados brutos / pessoais (currículos Lattes, CSVs com endereço/telefone) ---
+# Não versionar: 800+ MB de PDFs pessoais e exports com dados sensíveis.
+# O dashboard publicado (docs/) só usa dados agregados a nível de cidade.
+/DATA BASE/
+/EXPORTS_CSV/
+/DASHBOARD 2/cache/
+/DASHBOARD 2/output/
