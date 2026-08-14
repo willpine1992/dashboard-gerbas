@@ -104,7 +104,7 @@
     renderPPGChecklist();
     renderLinhasList(edgesForList);
     renderProfessorList();
-    renderRanking();
+    renderForeignRanking(edgesForCharts);
 
     const colorBase = edgesForCharts.length ? edgesForCharts : edgesForList;
     const colorInfo = buildLinhaColorScale(colorBase);
@@ -175,17 +175,25 @@
     rows.on("click", (_, d) => toggleProfessor(d.id));
   }
 
-  function renderRanking() {
-    const ranked = [...currentFilteredResearchers].sort((a, b) => b.n_matches - a.n_matches).slice(0, 12);
-    const wrap = d3.select("#prof-ranking");
-    if (!ranked.length) { wrap.html('<div class="empty-hint">Sem professores para os filtros atuais.</div>'); return; }
+  function renderForeignRanking(edgeSubset) {
+    const byAuthor = new Map();
+    for (const e of edgeSubset) {
+      const key = e.foreign_author_orcid || e.foreign_author_name;
+      if (!byAuthor.has(key)) {
+        byAuthor.set(key, { nome: e.foreign_author_name, instituicao: e.foreign_institution, count: 0 });
+      }
+      byAuthor.get(key).count += 1;
+    }
+    const ranked = [...byAuthor.values()].sort((a, b) => b.count - a.count).slice(0, 12);
 
-    const rows = wrap.selectAll(".rank").data(ranked, (d) => d.id).join("div").attr("class", "rank");
+    const wrap = d3.select("#foreign-ranking");
+    if (!ranked.length) { wrap.html('<div class="empty-hint">Sem pesquisadores para os filtros atuais.</div>'); return; }
+
+    const rows = wrap.selectAll(".rank").data(ranked, (d) => d.nome).join("div").attr("class", "rank");
     rows.html((d, i) => `
       <span class="rank__pos">${i + 1}</span>
-      <span class="rank__name" title="${d.nome}">${d.nome}</span>
-      <span class="rank__val">${d.n_matches}</span>`);
-    rows.on("click", (_, d) => toggleProfessor(d.id));
+      <span class="rank__name" title="${d.nome} · ${d.instituicao}">${d.nome}</span>
+      <span class="rank__val">${d.count}</span>`);
   }
 
   render();
