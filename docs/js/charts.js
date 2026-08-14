@@ -177,6 +177,45 @@ async function getWorld() {
   return _worldCache;
 }
 
+/* ---------------- Mini-mapa: localização de uma instituição ---------------- */
+async function renderInstitutionMap(el, lat, lon, label) {
+  const container = d3.select(el);
+  container.selectAll("*").remove();
+  const width = el.clientWidth, height = el.clientHeight;
+  if (width < 10 || height < 10) return;
+
+  const world = await getWorld();
+  const pad = 5; // graus ao redor do ponto
+  const bbox = {
+    type: "Polygon",
+    coordinates: [[[lon - pad, lat - pad], [lon + pad, lat - pad], [lon + pad, lat + pad], [lon - pad, lat + pad], [lon - pad, lat - pad]]],
+  };
+  const projection = d3.geoMercator().fitExtent([[10, 10], [width - 10, height - 10]], bbox);
+  const path = d3.geoPath(projection);
+
+  const svg = container.append("svg").attr("width", width).attr("height", height);
+  svg.append("g").selectAll("path.country")
+    .data(world.features)
+    .join("path")
+    .attr("class", "map-country")
+    .attr("fill", "#eef5f1")
+    .attr("stroke", "#ffffff")
+    .attr("stroke-width", 0.6)
+    .attr("d", path);
+
+  const xy = projection([lon, lat]);
+  const g = svg.append("g").attr("transform", `translate(${xy[0]},${xy[1]})`);
+  g.append("circle").attr("r", 7).attr("fill", "#0b3d2b").attr("stroke", "#fff").attr("stroke-width", 2);
+  g.append("circle").attr("r", 7).attr("fill", "none").attr("stroke", "#0b3d2b").attr("stroke-width", 1.4).attr("opacity", 0.5)
+    .append("animate").attr("attributeName", "r").attr("values", "7;20;7").attr("dur", "2.4s").attr("repeatCount", "indefinite");
+
+  if (label) {
+    svg.append("text").attr("x", xy[0]).attr("y", xy[1] - 14).attr("text-anchor", "middle")
+      .attr("class", "bar-label").style("font-weight", 800)
+      .text(truncateLabel(label, 30));
+  }
+}
+
 async function renderCountryMap(el, edgeSubset) {
   const container = d3.select(el);
   container.selectAll("*").remove();

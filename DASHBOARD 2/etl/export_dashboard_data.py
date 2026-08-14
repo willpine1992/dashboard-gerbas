@@ -166,13 +166,14 @@ def export_researchers(conn) -> dict[int, dict]:
 
 def export_edges(conn) -> list[dict]:
     rows = conn.execute(
-        """SELECT researcher_id, foreign_author_name, foreign_author_orcid, foreign_institution,
-                  foreign_country, matched_keywords, score
+        """SELECT researcher_id, foreign_author_name, foreign_author_orcid, foreign_author_openalex_id,
+                  foreign_institution, foreign_country, matched_keywords, score,
+                  sample_work_title, sample_work_doi
            FROM international_matches"""
     ).fetchall()
 
     edges = []
-    for rid, f_name, f_orcid, f_inst, f_country, matched_kw, score in rows:
+    for rid, f_name, f_orcid, f_oaid, f_inst, f_country, matched_kw, score, sample_title, sample_doi in rows:
         keywords = [k.strip() for k in (matched_kw or "").split(",") if k.strip()]
         for kw in keywords:
             edges.append({
@@ -180,8 +181,11 @@ def export_edges(conn) -> list[dict]:
                 "keyword": kw,
                 "foreign_author_name": f_name,
                 "foreign_author_orcid": f_orcid,
+                "foreign_author_openalex_id": f_oaid,
                 "foreign_institution": f_inst,
                 "foreign_country": f_country,
+                "sample_work_title": sample_title,
+                "sample_work_doi": sample_doi,
             })
     return edges
 

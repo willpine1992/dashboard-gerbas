@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GERBRAS · Perfil do Pesquisador</title>
+<link rel="stylesheet" href="css/style.css?v=4" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <img src="image/propespuea.svg" alt="PROPESP UEA" class="topbar__logo" />
+    <div class="topbar__title">
+      <strong>GERBRAS · Parcerias Internacionais</strong>
+      <span>Perfil do pesquisador estrangeiro</span>
+    </div>
+  </div>
+
+  <div class="topbar__stats" id="topbar-stats"></div>
+
+  <nav class="topbar__nav">
+    <a href="#" class="topbar__back" id="btn-back">← Voltar</a>
+    <a href="index.html" class="topbar__link">Painel</a>
+    <a href="flowmap.html" class="topbar__link">Mapa de Fluxo</a>
+  </nav>
+</header>
+
+<main class="layout layout--profile">
+
+  <!-- ===================== Coluna 1 — Pessoal ===================== -->
+  <section class="col col--left">
+
+    <div class="panel">
+      <div class="profile-head">
+        <div class="avatar" id="p-avatar">--</div>
+        <div>
+          <h1 id="p-nome">—</h1>
+          <div class="muted" id="p-sub">—</div>
+        </div>
+      </div>
+      <div class="badge-row" id="p-badges"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__header"><span class="panel__title">Contato</span></div>
+      <div id="p-contact"></div>
+    </div>
+
+    <div class="panel panel--grow">
+      <div class="panel__header">
+        <span class="panel__title">Linhas de pesquisa em comum</span>
+        <span class="panel__hint" id="p-linhas-hint"></span>
+      </div>
+      <div class="panel__body">
+        <div class="kw-tags" id="p-linhas"></div>
+      </div>
+    </div>
+
+    <div class="panel panel--grow">
+      <div class="panel__header">
+        <span class="panel__title">Professores UEA conectados</span>
+        <span class="panel__hint" id="p-profs-hint"></span>
+      </div>
+      <div class="panel__body">
+        <div class="picklist" id="p-profs"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== Coluna 2 — Instituição ===================== -->
+  <section class="col col--center">
+
+    <div class="panel">
+      <div class="panel__header"><span class="panel__title">Instituição</span></div>
+      <h1 id="i-nome" style="font-size:20px;">—</h1>
+      <div class="muted" id="i-sub" style="margin-top:2px;">—</div>
+      <div class="stat-row" style="margin-top:14px;">
+        <div class="stat-tile"><b id="i-matches">—</b><small>Conexões</small></div>
+        <div class="stat-tile"><b id="i-researchers">—</b><small>Prof. UEA</small></div>
+      </div>
+    </div>
+
+    <div class="panel panel--grow" style="min-height:220px;">
+      <div class="panel__header"><span class="panel__title">Localização</span></div>
+      <div class="panel__body" id="institution-map"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Sobre a instituição</span>
+        <span class="panel__hint">via OpenAlex</span>
+      </div>
+      <div id="i-details">
+        <div class="skeleton" style="width:80%;"></div>
+        <div class="skeleton" style="width:60%;"></div>
+        <div class="skeleton" style="width:70%;"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== Coluna 3 — Publicações ===================== -->
+  <section class="col col--right">
+
+    <div class="panel panel--grow">
+      <div class="panel__header">
+        <span class="panel__title">Publicações</span>
+        <span class="panel__hint" id="pub-hint">via OpenAlex</span>
+      </div>
+      <div class="panel__body" id="pub-list">
+        <div class="skeleton" style="width:95%;"></div>
+        <div class="skeleton" style="width:70%;"></div>
+        <div class="skeleton" style="width:85%; margin-top:16px;"></div>
+        <div class="skeleton" style="width:60%;"></div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="lib/d3.v7.min.js"></script>
+<script src="lib/topojson-client.min.js"></script>
+<script src="js/common.js?v=4"></script>
+<script src="js/charts.js?v=4"></script>
+<script src="js/professor.js?v=4"></script>
+</body>
+</html>
